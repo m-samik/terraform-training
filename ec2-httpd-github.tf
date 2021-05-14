@@ -64,7 +64,7 @@ resource "null_resource" "null" {
   connection {
     type = "ssh"
     user = "ec2-user"
-    private_key = file("/home/msamik/Arth/AWS/myawskey.pem")
+    private_key = file("")
     host = aws_instance.httpd.public_ip
   }
 
@@ -83,7 +83,7 @@ resource "null_resource" "null2" {
   connection {
     type = "ssh"
     user = "ec2-user"
-    private_key = file("/home/msamik/Arth/AWS/myawskey.pem")
+    private_key = file("")
     host = aws_instance.httpd.public_ip
   }
   provisioner "remote-exec" {
@@ -100,7 +100,7 @@ resource "null_resource" "null_3" {
   connection {
     type = "ssh"
     user = "ec2-user"
-    private_key = file("/home/msamik/Arth/AWS/myawskey.pem")
+    private_key = file("")
     host = aws_instance.httpd.public_ip
   }
   provisioner "remote-exec" {
