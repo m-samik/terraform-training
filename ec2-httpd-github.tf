@@ -64,7 +64,7 @@ resource "null_resource" "null" {
   connection {
     type = "ssh"
     user = "ec2-user"
-    private_key = file("")
+    private_key = file(" ")
     host = aws_instance.httpd.public_ip
   }
 
@@ -83,7 +83,7 @@ resource "null_resource" "null2" {
   connection {
     type = "ssh"
     user = "ec2-user"
-    private_key = file("")
+    private_key = file(" ")
     host = aws_instance.httpd.public_ip
   }
   provisioner "remote-exec" {
@@ -100,18 +100,20 @@ resource "null_resource" "null_3" {
   connection {
     type = "ssh"
     user = "ec2-user"
-    private_key = file("")
+    private_key = file(" ")
     host = aws_instance.httpd.public_ip
   }
   provisioner "remote-exec" {
     inline=[
-      #"sudo rm -rvf /var/www/html/*",
-      "sudo git clone https://github.com/m-samik/test.git /var/www/html"
+      "sudo git clone https://github.com/m-samik/test.git /var/www/html/test",
+      "sudo mv /var/www/html/test/*  /var/www/html",
+      "sudo rm -rvf /var/www/html/test"
       ]
   }
 }
 
 resource "null_resource" "opening_firefox" {
+  depends_on = [null_resource.null_3]
   provisioner "local-exec" {
     command= "google-chrome http://${aws_instance.httpd.public_ip}/"
   }
