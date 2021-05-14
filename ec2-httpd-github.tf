@@ -52,7 +52,10 @@ resource "aws_ebs_volume" "myhd" {
 }
 
 resource "aws_volume_attachment" "attachmyhd" {
-  device_name = "/dev/sdf"
+  depends_on = [
+    aws_ebs_volume.myhd
+  ]
+  device_name = "/dev/sdh"
   instance_id = aws_instance.httpd.id
   volume_id = aws_ebs_volume.myhd.id
 }
@@ -67,11 +70,16 @@ resource "null_resource" "null" {
 
   provisioner "remote-exec" {
     inline = [
-      "sudo yum install httpd php git  -y"]
+      "sudo yum install httpd php git  -y",
+      "sudo systemctl enable httpd --now"
+    ]
   }
 }
 
 resource "null_resource" "null2" {
+  depends_on = [
+    aws_volume_attachment.attachmyhd
+  ]
   connection {
     type = "ssh"
     user = "ec2-user"
@@ -80,12 +88,15 @@ resource "null_resource" "null2" {
   }
   provisioner "remote-exec" {
     inline = [
-      "sudo mkfs.ext4  /dev/xvdf",
-      "sudo mount  /dev/xvdf  /var/www/html"]
+      "sudo mkfs.ext4  /dev/sdh",
+      "sudo mount  /dev/sdh  /var/www/html"]
   }
 }
 
-resource "null_resource" "null3" {
+resource "null_resource" "null_3" {
+  depends_on = [
+    null_resource.null2
+  ]
   connection {
     type = "ssh"
     user = "ec2-user"
@@ -94,16 +105,15 @@ resource "null_resource" "null3" {
   }
   provisioner "remote-exec" {
     inline=[
-      "sudo git clone https://github.com/m-samik/test.git /var/www/html/test",
-      "sudo mv /var/www/html/test/index.php  /var/www/html/",
-      "sudo rm  -rf /var/www/html/test/",
-      "sudo systemctl start httpd"]
+      #"sudo rm -rvf /var/www/html/*",
+      "sudo git clone https://github.com/m-samik/test.git /var/www/html"
+      ]
   }
 }
 
 resource "null_resource" "opening_firefox" {
   provisioner "local-exec" {
-    command= "firefox ${aws_instance.httpd.public_ip}"
+    command= "google-chrome http://${aws_instance.httpd.public_ip}/"
   }
 }
 
